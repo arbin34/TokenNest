@@ -1,1 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Blog Chain — Modern Blog Frontend</title>
+  <meta name="description" content="A responsive single-file frontend for a blog chain with search, filters, and pagination." />
+  <!-- Tailwind via CDN for quick styling (good for prototyping) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Small custom tweaks */
+    .line-clamp-3 { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <header class="bg-white shadow-sm sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <a class="flex items-center gap-3" href="#">
+        <svg class="w-8 h-8 text-indigo-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 7h16M4 12h16M4 17h10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div>
+          <div class="font-bold text-lg">Blog Chain</div>
+          <div class="text-xs text-gray-500">Stories that connect</div>
+        </div>
+      </a>
+
+      <nav class="hidden md:flex items-center gap-4">
+        <a class="px-3 py-2 rounded-md hover:bg-gray-100" href="#">Home</a>
+        <a class="px-3 py-2 rounded-md hover:bg-gray-100" href="#">Categories</a>
+        <a class="px-3 py-2 rounded-md hover:bg-gray-100" href="#">About</a>
+        <a class="px-3 py-2 rounded-md bg-indigo-600 text-white hover:brightness-95" href="#">Write</a>
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <div class="hidden sm:block">
+          <input id="globalSearch" type="search" placeholder="Search posts..." class="px-3 py-2 border rounded-md w-64 focus:outline-none focus:ring-2 focus:ring-indigo-200"/>
+        </div>
+        <button id="mobileMenuBtn" class="md:hidden p-2 rounded-md hover:bg-gray-100">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Posts column -->
+    <section class="lg:col-span-2">
+      <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-semibold">Latest from Blog Chain</h1>
+        <div class="flex items-center gap-3">
+          <select id="sortSelect" class="px-3 py-2 border rounded-md">
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+            <option value="popular">Most Popular</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="postsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <!-- JS will render post cards here -->
+      </div>
+
+      <div class="mt-8 flex justify-center">
+        <nav class="inline-flex -space-x-px" id="pagination">
+          <!-- JS pagination buttons -->
+        </nav>
+      </div>
+    </section>
+
+    <!-- Sidebar -->
+    <aside class="space-y-6">
+      <div class="bg-white p-4 rounded-lg shadow-sm">
+        <h3 class="font-semibold mb-2">Quick Search</h3>
+        <input id="sidebarSearch" type="text" placeholder="Search titles or tags" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-200"/>
+      </div>
+
+      <div class="bg-white p-4 rounded-lg shadow-sm">
+        <h3 class="font-semibold mb-3">Categories</h3>
+        <div id="categories" class="flex flex-wrap gap-2">
+          <!-- category chips -->
+        </div>
+      </div>
+
+      <div class="bg-white p-4 rounded-lg shadow-sm">
+        <h3 class="font-semibold mb-3">Popular Posts</h3>
+        <ul id="popularList" class="space-y-3 text-sm text-gray-700">
+          <!-- JS popular posts -->
+        </ul>
+      </div>
+
+      <div class="bg-white p-4 rounded-lg shadow-sm text-sm text-gray-600">
+        <h3 class="font-semibold mb-2">About Blog Chain</h3>
+        <p>Blog Chain connects writers and readers with a clean, responsive interface. This is a frontend prototype — connect it to your API or CMS for live content.</p>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Post Modal -->
+  <div id="postModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-auto shadow-xl">
+      <div class="p-4 border-b flex items-start justify-between">
+        <div>
+          <h2 id="modalTitle" class="text-xl font-semibold">Post title</h2>
+          <div id="modalMeta" class="text-sm text-gray-500"></div>
+        </div>
+        <button id="closeModal" class="p-2 rounded-md hover:bg-gray-100">✕</button>
+      </div>
+      <div id="modalContent" class="p-6 prose max-w-none"></div>
+    </div>
+  </div>
+
+  <footer class="mt-12 py-8 bg-white border-t">
+    <div class="max-w-6xl mx-auto px-4 text-center text-gray-600">© <span id="year"></span> Blog Chain — Built with ❤️ for storytellers.</div>
+  </footer>
+
+  <script>
+    // Sample data - replace this array with your API fetch
+    const POSTS = [
+      { id: 1, title: 'Designing for Calm: Minimal UI Patterns', excerpt: 'Minimal interfaces reduce cognitive load and increase usability. Learn how to design calm UIs that delight users.', author: 'Asha Rao', date: '2025-09-10', readTime: '6 min', category: 'Design', tags: ['UI','Design','UX'], image: 'https://picsum.photos/seed/1/800/600', popularity: 200, content: '<p>Minimal design focuses on removing the unnecessary. Start by auditing the interface and removing duplication....</p>' },
+      { id: 2, title: 'Running Analytics Pipelines with Python', excerpt: 'A practical guide to building reliable data pipelines using Python, Airflow, and simple monitoring techniques.', author: 'Vikram Sen', date: '2025-08-27', readTime: '8 min', category: 'Data', tags: ['Python','Data','Pipelines'], image: 'https://picsum.photos/seed/2/800/600', popularity: 340, content: '<p>Data pipelines are the backbone of analytics. A recommended structure is to separate extraction...</p>' },
+      { id: 3, title: 'How to Start a Community Newsletter', excerpt: 'Community newsletters help build trust and keep members engaged. Here are steps to start and scale one.', author: 'Maya Patel', date: '2025-07-03', readTime: '5 min', category: 'Community', tags: ['Newsletters','Community'], image: 'https://picsum.photos/seed/3/800/600', popularity: 150, content: '<p>Newsletters are low-friction ways to reach your core audience. Pick a cadence and stick to it...</p>' },
+      { id: 4, title: 'Intro to Web Accessibility', excerpt: 'Accessibility improves UX for everyone. Learn quick wins you can implement today.', author: 'Rahul Nair', date: '2025-06-01', readTime: '7 min', category: 'Web', tags: ['Accessibility','Web'], image: 'https://picsum.photos/seed/4/800/600', popularity: 420, content: '<p>Accessibility starts with semantic HTML and keyboard navigation...</p>' },
+      { id: 5, title: 'Freelancing 101: Pricing Your Work', excerpt: 'Set fair prices and avoid undercharging. This practical guide covers hourly vs project pricing.', author: 'Neha Gupta', date: '2025-05-12', readTime: '9 min', category: 'Career', tags: ['Freelance','Pricing'], image: 'https://picsum.photos/seed/5/800/600', popularity: 90, content: '<p>Pricing is often emotional. Start by understanding your baseline costs...</p>' }
+    ];
+
+    // State
+    let state = { query: '', category: null, sort: 'newest', page: 1, perPage: 4 };
+
+    // Helpers
+    function formatDate(iso) {
+      const d = new Date(iso);
+      return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    function renderPosts() {
+      const postsGrid = document.getElementById('postsGrid');
+      const filtered = POSTS.filter(p => {
+        const matchesQuery = state.query.trim() === '' || (p.title + ' ' + p.excerpt + ' ' + p.tags.join(' ')).toLowerCase().includes(state.query.toLowerCase());
+        const matchesCat = !state.category || p.category === state.category;
+        return matchesQuery && matchesCat;
+      });
+
+      // sort
+      if (state.sort === 'newest') filtered.sort((a,b)=> new Date(b.date)-new Date(a.date));
+      if (state.sort === 'oldest') filtered.sort((a,b)=> new Date(a.date)-new Date(b.date));
+      if (state.sort === 'popular') filtered.sort((a,b)=> b.popularity - a.popularity);
+
+      // pagination
+      const total = filtered.length;
+      const start = (state.page-1)*state.perPage;
+      const pageItems = filtered.slice(start, start + state.perPage);
+
+      postsGrid.innerHTML = pageItems.map(p => `
+        <article class="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition"> 
+          <img src="${p.image}" alt="${p.title}" class="w-full h-40 object-cover"> 
+          <div class="p-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs text-indigo-600 font-medium">${p.category}</span>
+              <span class="text-xs text-gray-500">${formatDate(p.date)} • ${p.readTime}</span>
+            </div>
+            <h3 class="font-semibold text-lg mb-2 line-clamp-3">${p.title}</h3>
+            <p class="text-sm text-gray-600 mb-3 line-clamp-3">${p.excerpt}</p>
+            <div class="flex items-center justify-between">
+              <div class="flex gap-2 text-xs">
+                ${p.tags.map(t=>`<span class="px-2 py-1 bg-gray-100 rounded-full">${t}</span>`).join('')}
+              </div>
+              <div>
+                <button onclick="openPost(${p.id})" class="px-3 py-1 rounded-md bg-indigo-600 text-white text-sm">Read</button>
+              </div>
+            </div>
+          </div>
+        </article>
+      `).join('');
+
+      renderPagination(total);
+    }
+
+    function renderPagination(total) {
+      const pages = Math.ceil(total / state.perPage) || 1;
+      const el = document.getElementById('pagination');
+      el.innerHTML = '';
+      for (let i=1;i<=pages;i++){
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        btn.className = `px-3 py-1 border ${i===state.page? 'bg-indigo-600 text-white':'bg-white'} rounded-l-md`;
+        btn.onclick = ()=>{ state.page = i; renderPosts(); window.scrollTo({top:0,behavior:'smooth'}); };
+        el.appendChild(btn);
+      }
+    }
+
+    function renderCategories(){
+      const cats = Array.from(new Set(POSTS.map(p=>p.category)));
+      const container = document.getElementById('categories');
+      container.innerHTML = '<button onclick="setCategory(null)" class="px-3 py-1 rounded-md bg-gray-100">All</button>' + cats.map(c=>`<button onclick="setCategory('${c.replace(/'/g,'\\\'')}')" class="px-3 py-1 rounded-md bg-gray-100">${c}</button>`).join('');
+    }
+
+    function renderPopular(){
+      const popular = POSTS.slice().sort((a,b)=> b.popularity - a.popularity).slice(0,3);
+      const list = document.getElementById('popularList');
+      list.innerHTML = popular.map(p=> `<li class="flex items-start gap-3"><img src="${p.image}" class="w-12 h-8 object-cover rounded"/><div><a href="#" onclick="openPost(${p.id});return false;" class="font-medium">${p.title}</a><div class="text-xs text-gray-500">${formatDate(p.date)}</div></div></li>`).join('');
+    }
+
+    function setCategory(cat){ state.category = cat; state.page = 1; renderPosts(); }
+
+    function openPost(id){
+      const p = POSTS.find(x=> x.id===id);
+      if(!p) return;
+      document.getElementById('modalTitle').textContent = p.title;
+      document.getElementById('modalMeta').innerHTML = `${p.author} • ${formatDate(p.date)} • ${p.readTime}`;
+      document.getElementById('modalContent').innerHTML = `<img src="${p.image}" class="w-full h-56 object-cover rounded mb-4"/>` + p.content;
+      document.getElementById('postModal').classList.remove('hidden');
+      document.getElementById('postModal').classList.add('flex');
+    }
+
+    // events
+    document.getElementById('closeModal').addEventListener('click', ()=>{
+      document.getElementById('postModal').classList.add('hidden');
+      document.getElementById('postModal').classList.remove('flex');
+    });
+
+    document.getElementById('globalSearch').addEventListener('input', (e)=>{ state.query = e.target.value; state.page = 1; renderPosts(); });
+    document.getElementById('sidebarSearch').addEventListener('input', (e)=>{ state.query = e.target.value; state.page = 1; renderPosts(); });
+    document.getElementById('sortSelect').addEventListener('change', (e)=>{ state.sort = e.target.value; renderPosts(); });
+
+    // initial render
+    document.getElementById('year').textContent = new Date().getFullYear();
+    renderCategories();
+    renderPopular();
+    renderPosts();
+  </script>
+</body>
+</html>
 
