@@ -211,7 +211,7 @@
       document.getElementById('postModal').classList.add('flex');
     }
 
-    // events
+    // Events 
     document.getElementById('closeModal').addEventListener('click', ()=>{
       document.getElementById('postModal').classList.add('hidden');
       document.getElementById('postModal').classList.remove('flex');
@@ -221,7 +221,7 @@
     document.getElementById('sidebarSearch').addEventListener('input', (e)=>{ state.query = e.target.value; state.page = 1; renderPosts(); });
     document.getElementById('sortSelect').addEventListener('change', (e)=>{ state.sort = e.target.value; renderPosts(); });
 
-    // initial render
+    // initial render of document 
     document.getElementById('year').textContent = new Date().getFullYear();
     renderCategories();
     renderPopular();
