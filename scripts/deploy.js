@@ -2,7 +2,7 @@
 const hre = require("hardhat");
 
 async function main() {
-  const Contract = await hre.ethers.getContractFactory("TokenNest");
+  const Contract = await hre.ethers.getContractFactory("TokenNest code ");
   const instance = await Contract.deploy();
   await instance.deployed();
 
