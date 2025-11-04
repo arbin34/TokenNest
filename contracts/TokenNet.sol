@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
-// Commit: feat: add TokenNest smart watch and contract with owner-restricted data setter and getter
+// Commit: feat: add TokenNest smart contract with owner-restricted data setter and getter
+
 pragma solidity ^0.8.17;
 
 /**
