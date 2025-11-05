@@ -1,6 +1,6 @@
-
+// required files 
 const hre = require("hardhat");
-
+//main file 
 async function main() {
   const Contract = await hre.ethers.getContractFactory("TokenNest code ");
   const instance = await Contract.deploy();
