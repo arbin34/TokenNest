@@ -10,10 +10,10 @@ pragma solidity ^0.8.17;
  */
 
 contract TokenNest {
-    address public owner;
+    address public own;
 
     constructor() {
-        owner = msg.sender;
+        own = msg.sender;
     }
 
     // Minimal setter/getter example
