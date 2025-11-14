@@ -4,16 +4,16 @@
 pragma solidity ^0.8.17;
 
 /**
- * @title TokenNest
+ * @Title TokenNest
  * @notice Minimal and gas-efficient smart contract for demonstration.
  * describe the project for GOG by me .
  */
 
 contract TokenNest {
-    address public own;
+    address public owner;
 
     constructor() {
-        own = msg.sender;
+        owner = msg.sender;
     }
 
     // Minimal setter/getter example
