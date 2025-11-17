@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
-// Commit: feat: add TokenNest smart contract with owner-restricted data setter, getter
+// Commit: feat: add TokenNest smart contract with owner-restricted data setter and getter
 
 pragma solidity ^0.8.17;
 
 /**
  * @Title TokenNest
  * @notice Minimal and gas-efficient smart contract for demonstration.
- * describe the project for GOG by me .
+ * describe this project
  */
 
 contract TokenNest {
