@@ -10,17 +10,17 @@ pragma solidity ^0.8.17;
  */
 
 contract TokenNest {
-    address public owner;
+    address public ow;
 
     constructor() {
-        owner = msg.sender;
+        ow = msg.sender;
     }
 
     // Minimal setter/getter example
     string private data;
 
     function setData(string calldata _data) external {
-        require(msg.sender == owner, "Only owner");
+        require(msg.sender == ow, "Only ow");
         data = _data;
     }
 
