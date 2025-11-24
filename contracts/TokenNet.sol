@@ -1,29 +1,38 @@
 // SPDX-License-Identifier: MIT
-// Commit: feat: add TokenNest smart contract with owner-restricted data setter and getter
+// Commit: feat: improved TokenNest with event logging and access modifier
 
 pragma solidity ^0.8.17;
 
 /**
- * @Title TokenNest
- * @notice Minimal and gas-efficient smart contract for demonstration.
- * describe this project of blockchain daily .
+ * @title TokenNest
+ * @notice Minimal and gas-efficient smart contract with owner-restricted setter.
  */
-
 contract TokenNest {
-    address public ow;
+    address public owner;
 
-    constructor() {
-        ow = msg.sender;
-    }
-
-    // Minimal setter/getter example
+    // Stored private data
     string private data;
 
-    function setData(string calldata _data) external {
-        require(msg.sender == ow, "Only ow");
-        data = _data;
+    // Event emitted on data update
+    event DataUpdated(string newData, address updatedBy);
+
+    constructor() {
+        owner = msg.sender;
     }
 
+    // Modifier for owner-only access
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not owner");
+        _;
+    }
+
+    // Set the data (only accessible by contract owner)
+    function setData(string calldata _data) external onlyOwner {
+        data = _data;
+        emit DataUpdated(_data, msg.sender);
+    }
+
+    // Retrieve stored data
     function getData() external view returns (string memory) {
         return data;
     }
