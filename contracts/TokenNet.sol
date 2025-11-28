@@ -6,7 +6,7 @@ pragma solidity ^0.8.17;
 
 /**
  * @title TokenNest
- * @notice Minimal and gas-efficient smart contract with owner-restricted setter.
+ * @notice Minimal efficient smart contract with owner-restricted setter.
  */
 contract TokenNest {
     address public owner;
