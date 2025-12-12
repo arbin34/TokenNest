@@ -5,7 +5,7 @@
 pragma solidity ^0.8.17;
 
 /**
- * @Title TokenNest
+ * @Title tokenNest
  * @notice Minimaal efficiently  smart contract with owner-restricted setter.
  */
 contract TokenNest {
